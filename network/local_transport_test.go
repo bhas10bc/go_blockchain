@@ -1,29 +1,37 @@
 package network
 
-//"github.com/stretchr/testify/assert"
+import (
+	"testing"
 
-// func TestConnect(t *testing.T) {
-// 	tra := NewLocalTransport("A")
-// 	trb := NewLocalTransport("B")
+	"github.com/stretchr/testify/assert"
+)
 
-// 	tra.Connect(trb)
-// 	trb.Connect(tra)
+func TestConnect(t *testing.T) {
+	tra := NewLocalTransport("A")
+	trb := NewLocalTransport("B")
 
-// assert.Equal(t,tra.peers[trb.Addr()], trb)
-// assert.Equal(t, trb.peers[tra.Addr()], tra)
-// }
+	tra.Connect(trb)
+	trb.Connect(tra)
+	assert.Equal(t, tra.peers[trb.Addr()], trb)
+	assert.Equal(t, trb.peers[tra.Addr()], tra)
+}
 
-// func TestMessage(t *testing.T){
-// 	tra := NewLocalTransport("A")
-// 	trb := NewLocalTransport("B")
+func TestSendMessage(t *testing.T) {
+	tra := NewLocalTransport("A")
+	trb := NewLocalTransport("B")
 
-// 	tra.Connect(trb)
-// 	trb.Connect(tra)
+	tra.Connect(trb)
+	trb.Connect(tra)
 
-// 	msg := []byte("hello world")
-// 	assert.Nil(t, tra.SendMessage(trb.addr, msg))
+	msg := []byte("hello world")
+	assert.Nil(t, tra.SendMessage(trb.addr, msg))
 
-// 	rpc := <- trb.Consume()
-// 	assert.Equal(t, rpc.Payload, msg)
-// 	assert.Equal(t, rpc.From, tra.addr)
-// }
+	rpc := <-trb.Consume()
+	buf := make([]byte, len(msg))
+	n, err := rpc.Payload.Read(buf)
+	assert.Nil(t, err)
+	assert.Equal(t, n, len(msg))
+
+	assert.Equal(t, buf, msg)
+	assert.Equal(t, rpc.From, tra.addr)
+}

@@ -4,6 +4,7 @@ import (
 	"math/rand"
 	"strconv"
 	"testing"
+
 	"y/core"
 
 	"github.com/stretchr/testify/assert"
@@ -11,38 +12,36 @@ import (
 
 func TestTxPool(t *testing.T) {
 	p := NewTxPool()
-	assert.Equal(t,p.Len(), 0 )
+	assert.Equal(t, p.Len(), 0)
 }
 
-func TestTxPoolAddTx(t *testing.T){
+func TestTxPoolAddTx(t *testing.T) {
 	p := NewTxPool()
+	tx := core.NewTransaction([]byte("fooo"))
+	assert.Nil(t, p.Add(tx))
+	assert.Equal(t, p.Len(), 1)
 
-	tx:= core.NewTransaction([]byte ("test"))
-	assert.Nil(t,p.Add(tx))
-	assert.Equal(t,p.Len(), 1)
-
-	_ = core.NewTransaction([]byte ("test"))
-	assert.Equal(t,p.Len(),1)
+	_ = core.NewTransaction([]byte("fooo"))
+	assert.Equal(t, p.Len(), 1)
 
 	p.Flush()
-	assert.Equal(t,p.Len(), 0 )
+	assert.Equal(t, p.Len(), 0)
 }
 
-func TestSortTransactions(t *testing.T){
+func TestSortTransactions(t *testing.T) {
 	p := NewTxPool()
 	txLen := 1000
 
-	for i := 0; i <txLen; i++ {
-		tx := core.NewTransaction([]byte(strconv.FormatInt(int64(i),10)))
-		tx.SetFirstSeen(int64(i * rand.Intn(1000)))
-		assert.Nil(t,p.Add(tx))
+	for i := 0; i < txLen; i++ {
+		tx := core.NewTransaction([]byte(strconv.FormatInt(int64(i), 10)))
+		tx.SetFirstSeen(int64(i * rand.Intn(10000)))
+		assert.Nil(t, p.Add(tx))
 	}
+
 	assert.Equal(t, txLen, p.Len())
 
 	txx := p.Transactions()
-	for i:= 0; i < len(txx)-1; i++{
-		assert.True(t,txx[i].FirstSeen()< txx[i+1].FirstSeen())
+	for i := 0; i < len(txx)-1; i++ {
+		assert.True(t, txx[i].FirstSeen() < txx[i+1].FirstSeen())
 	}
-
-
 }
