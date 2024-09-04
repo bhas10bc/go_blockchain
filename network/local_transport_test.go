@@ -34,8 +34,7 @@ func TestSendMessage(t *testing.T) {
 	assert.Equal(t, rpc.From, tra.addr)
 }
 
-
-func TestBroadcast(t *testing.T){
+func TestBroadcast(t *testing.T) {
 	tra := NewLocalTransport("A")
 	trb := NewLocalTransport("B")
 	trc := NewLocalTransport("C")
@@ -43,18 +42,16 @@ func TestBroadcast(t *testing.T){
 	tra.Connect(trb)
 	tra.Connect(trc)
 
-	msg := []byte ("test")
+	msg := []byte("foo")
 	assert.Nil(t, tra.Broadcast(msg))
 
-	rpcb := <- trb.Consume()
-	b , err := ioutil.ReadAll(rpcb.Payload)
+	rpcb := <-trb.Consume()
+	b, err := ioutil.ReadAll(rpcb.Payload)
 	assert.Nil(t, err)
-	assert.Equal(t,b, msg)
+	assert.Equal(t, b, msg)
 
-	rpcc := <- trc.Consume()
-	c , err := ioutil.ReadAll(rpcc.Payload)
+	rpcC := <-trc.Consume()
+	b, err = ioutil.ReadAll(rpcC.Payload)
 	assert.Nil(t, err)
-	assert.Equal(t,c, msg)
-
-
+	assert.Equal(t, b, msg)
 }

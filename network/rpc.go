@@ -48,34 +48,33 @@ type DecodedMessage struct {
 
 type RPCDecodeFunc func(RPC) (*DecodedMessage, error)
 
-func DefaultRPCDecodeFunc(rpc RPC) (*DecodedMessage, error){
+func DefaultRPCDecodeFunc(rpc RPC) (*DecodedMessage, error) {
 	msg := Message{}
 	if err := gob.NewDecoder(rpc.Payload).Decode(&msg); err != nil {
-		return nil,fmt.Errorf("failed to decode message from %s: %s", rpc.From, err)
+		return nil, fmt.Errorf("failed to decode message from %s: %s", rpc.From, err)
 	}
 
 	logrus.WithFields(logrus.Fields{
+		"from": rpc.From,
 		"type": msg.Header,
-		"from":rpc.From,
-	}).Debug("new incoming msg")
+	}).Debug("new incoming message")
 
 	switch msg.Header {
 	case MessageTypeTx:
 		tx := new(core.Transaction)
 		if err := tx.Decode(core.NewGobTxDecoder(bytes.NewReader(msg.Data))); err != nil {
-			return nil,err
+			return nil, err
 		}
 
 		return &DecodedMessage{
 			From: rpc.From,
 			Data: tx,
 		}, nil
+
 	default:
-		return nil,fmt.Errorf("invalid message header %x", msg.Header)
+		return nil, fmt.Errorf("invalid message header %x", msg.Header)
 	}
 }
-
-
 
 type RPCProcessor interface {
 	ProcessMessage(*DecodedMessage) error
